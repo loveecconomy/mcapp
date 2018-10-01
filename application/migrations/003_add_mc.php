@@ -25,6 +25,14 @@ class Migration_Add_mc extends CI_Migration {
                 'type' => 'VARCHAR',
                 'constraint' => '300',
             ),
+            'mc_name' => array(
+                'type' => 'VARCHAR',
+                'constraint' => '300',
+            ),
+            'mc_password' => array(
+                'type' => 'VARCHAR',
+                'constraint' => '300',
+            ),
             'mc_date_added' => array(
                 'type' => 'DATETIME',
                 'default'    => '2018-08-13 06:00:00',

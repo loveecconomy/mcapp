@@ -35,12 +35,22 @@ class Report extends CI_Controller {
 		echo json_encode($data);
 	}
 
-	public function get_next_question(){
+	public function load_question(){
 		header('Access-Control-Allow-Origin: *');
 		header("Access-Control-Allow-Methods: GET, OPTIONS");
 
-		$formRequest = $_POST;
-		$nextQuestion = $this->report_model->next_question($formRequest);
-		echo json_encode($nextQuestion);
+		$Question = $this->report_model->load_report_questions();
+		echo json_encode($Question);
+	}
+
+	public function saveReport(){
+		header('Access-Control-Allow-Origin: *');
+		header("Access-Control-Allow-Methods: GET, OPTIONS");
+		$answers = $_POST;
+		foreach($answers['data'] as $answer){
+			echo "Answer is =>";
+			$response = $this->report_model->save_report_answers($answer);
+			echo json_encode($response);
+		}
 	}
 }

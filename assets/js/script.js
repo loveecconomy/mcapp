@@ -1,28 +1,27 @@
 const body = new PerfectScrollbar('body');
 const content = new PerfectScrollbar('#content');
 
+var questionBox = document.getElementsByClassName('question-box');
+console.log(questionBox)
 $(document).ready(function(){
+    loadQuestion();
+    pageLoaded();
     var answers;
     var mapPinInput = `<div class="map_pin_input" >
                          <input />
                        </div>`
-    $('.map-pin').click(function (){
-        var QuestionBox =  $(this).parent('.question-box');
-        if($('.map_pin_input').length == 0 ){
-            QuestionBox.append(mapPinInput)
-        }
-    })
-    $('.next-question').click(function() {
+    $('.submit').click(function() {
         var reports = JSON.parse(localStorage.getItem('report'));
         var stored = JSON.parse(localStorage.getItem('answers'));
-        if(reports == null){
+        console.log(reports)
+        if(reports === null){
             /**
              *@TODO add onchange and update
              */
             var _title = $('#title').val()
             // crate a new report
             if( _title != ''){
-                var newReport = {
+                var newReport = { 
                     title: _title,
                     completed: 0
                 }
@@ -34,23 +33,47 @@ $(document).ready(function(){
                     newReport.report_id = data.report_id;
                     newReport.questionaire_id = data.questionaire_id;
                     localStorage.setItem('report', JSON.stringify(newReport))
+                    storeQuestion()
                 }).fail( function(err){
                     console.log(err)
                 })
-                storeQuestion()
             }
-        }else{
-            storeQuestion()
         }
     })
-    $('.reset').click(function(){
-        localStorage.removeItem('report');
-        localStorage.removeItem('answers')
-        console.log('successfully clear localstorage')
-        location.reload()
+    $('.sidebar-box').click(function(){
+        $(this).toggleClass('expanded')
+    })
+    $('.report-list__item').click(function(e){
+        if(e.target.tagName !== 'SPAN'){
+            if($(this).hasClass('expanded')){
+                $(this).removeClass('expanded')
+            }else{
+                $('.report-list__item').removeClass('expanded')
+                $(this).addClass('expanded')
+            }
+        }
     })
 })
 
+function pageLoaded(){
+    localStorage.removeItem('report');
+    localStorage.removeItem('answers')
+    console.log('successfully clear localstorage')
+}
+
+function loadQuestion(){
+    $.get('http://mcapp.edgeplas.com/report/get_question', function (data){
+        data = JSON.parse(data)
+        $('.loader-overlay').addClass('disabled');
+        data.forEach(function(item){
+            if(item.active === "1"){
+                addTemplate(item);
+            }
+        })
+    }).fail( function(err){
+        console.log(err)
+    }) 
+}
 function storeQuestion(){
     var reports = JSON.parse(localStorage.getItem('report'));
     var stored = JSON.parse(localStorage.getItem('answers'));
@@ -66,9 +89,10 @@ function storeQuestion(){
             }        
         }
         if(input.value !== ''){
+            var questionId = currentQuestions[ques].dataset.question
             var ans = {
                 answer : input.value,
-                question_id: ques+2, // accomodate for first two questions
+                question_id: questionId,
                 report_id : reports.report_id
             }
             stored.push(ans); // append answer to answers[Array] and store to localstorage
@@ -76,28 +100,29 @@ function storeQuestion(){
         }
         if(ques+1 == currentQuestions.length){
             var storedAnswers = JSON.parse(localStorage.getItem('answers')); // get stored answers from localStorage
-            var lastQuestion = storedAnswers[storedAnswers.length-1]; // get last question from stored answers 
-            $('.question-box').remove()
-            loadNextQuestion(lastQuestion.question_id, reports.questionaire_id)
             console.log(storedAnswers)
+            saveAnswers(storedAnswers)
         }
     })
 }
-function loadNextQuestion(lastQuestion, questionTemplate){
-    var formData = {
-        lastQues: lastQuestion, 
-        questionaire: questionTemplate
+
+function saveAnswers(dataArray){
+    var postData = {
+        data: dataArray
     }
-    $.post('http://mcapp.edgeplas.com/report/next_question', formData, function (data){
-        data = JSON.parse(data)
-        addTemplate(data);
-    }).fail( function(err){
-        console.log(err)
-    })                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+    console.log('Data Array is ')
+    console.log(dataArray);
+    $.ajax({
+        type: 'POST',
+        url: 'http://mcapp.edgeplas.com/report/save_report',
+        data: postData, 
+        success:function(response){
+            console.log(JSON.parse(response))
+        }})
 }
 
 function addTemplate(template){
-    var questionTemplate = `<div class="question-box mb-5">
+    var questionTemplate = `<div class="question-box mb-5" data-question="${template.question_id}">
                                 <h5>${template.question}? </h5>
                                 <div class="answer-box ${template.question_answer_field}">
                                     <span class="${template.icon} left"></span>

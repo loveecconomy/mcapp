@@ -30,11 +30,16 @@ class Report_model extends CI_Model{
         return $insert_id;
     }
 
-    public function next_question($data){
-        $this->db->where('questionaire_id', $data['questionaire']);
-        $this->db->where('question_id', $data['lastQues']);
+    public function load_report_questions(){
+        $this->db->where('questionaire_id',1);
         $result = $this->db->get('questions');
-        return $result->row_array();
+        return $result->result_array();
+    }
+    
+    public function save_report_answers($data){
+        var_dump($data);
+        $this->db->insert('answers',$data);
+        return TRUE;
     }
 
 }

@@ -55,8 +55,11 @@ $route['assets/(:any)'] = 'assets/$1';
 $route['setup'] = 'setup';
 $route['setup/database'] = 'setup/do_migration';
 
-$route['report'] = 'report/index';
-$route['report/add'] = 'report/add_view';
-$route['create_report'] = 'report/create';
-$route['report/next_question'] = 'report/get_next_question';
+$route['login']                = 'account/index'; 
+$route['register']             = 'account/register'; 
+$route['report']               = 'report/index';
+$route['report/add']           = 'report/add_view';
+$route['create_report']        = 'report/create';
+$route['report/get_question']  = 'report/load_question';
+$route['report/save_report']   = 'report/saveReport';
 $route['translate_uri_dashes'] = FALSE;
